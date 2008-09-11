@@ -1,0 +1,17 @@
+<html>
+<head>
+<script type="text/javascript" src="lib/JSAN.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+var jsan = new JSAN('lib');
+jsan.use('Test.Harness.Browser');
+
+var t = new Test.Harness.Browser();
+t.runTests(
+    "base.html",
+    "creole.html"
+);
+</script>
+</body>
+</html>
