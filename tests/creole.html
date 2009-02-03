@@ -535,8 +535,9 @@ var tests = [
   },
   {
     name:   "Preformatted block + CR",
-    input:  "{{{\r\nsome text\r\n}}}",
-    output: "<pre>some text\n</pre>"
+    input:  "{{{\r\nsome text\r\nsome text\r\n}}}",
+    output: "<pre>some text\r\nsome text\r\n</pre>",
+    options: { IE: true }
   },
   {
     name:   "Formatting interwiki links with function",
@@ -559,21 +560,20 @@ var creole = new Parse.Simple.Creole( {
 } );
 
 var div = document.createElement('div');
-creole.parse(div, '* aaaa');
 
 for (var i in tests) {
     var test = tests[i];
 
     var expected = document.createElement('div');
-    expected.innerHTML = tests[i].output;
+    expected.innerHTML = test.output;
     expected = expected.cloneNode(true);
 
     var div = document.createElement('div');
-    creole.parse(div, tests[i].input);
+    creole.parse(div, test.input, test.options);
     div.innerHTML = div.innerHTML;
     div = div.cloneNode(true);
 
-    is(expected.innerHTML, div.innerHTML, tests[i].name);
+    is(expected.innerHTML, div.innerHTML, test.name);
 }
 //]]>--></script>
 </pre>
