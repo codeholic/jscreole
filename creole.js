@@ -1,18 +1,174 @@
-// $Id$
-if (typeof JSAN != 'undefined') {
-    new JSAN().use('Parse.Simple.Base');
-}
-else {
-    if (typeof Parse == 'undefined'
-        || typeof Parse.Simple == 'undefined'
-        || typeof Parse.Simple.Base == 'undefined')
-    {
-        throw new Error("You must load either JSAN or Parse.Simple.Base " +
-            "before loading Parse.Simple.Creole");
-    }
-}
+/*
+ * JavaScript Creole 1.0 Wiki Markup Parser
+ * $Id$
+ *
+ * Copyright (c) 2009 Ivan Fomichev
+ *
+ * Portions Copyright (c) 2007 Chris Purcell
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
 
-//!begin
+if (!Parse) { var Parse = {}; }
+if (!Parse.Simple) { Parse.Simple = {}; }
+
+Parse.Simple.Base = function(grammar, options) {
+    if (!arguments.length) { return; }
+
+    this.grammar = grammar;
+    this.grammar.root = new this.ruleConstructor(this.grammar.root);
+    this.options = options;
+};
+
+Parse.Simple.Base.prototype = {
+    ruleConstructor: null,
+    grammar: null,
+    options: null,
+
+    parse: function(node, data, options) {
+        if (options) {
+            for (i in this.options) {
+                if (typeof options[i] == 'undefined') { options[i] = this.options[i]; }
+            }
+        }
+        else {
+            options = this.options;
+        }
+        data = data.replace(/\r/g, ''); // for IE
+        this.grammar.root.apply(node, data, options);
+    }
+};
+
+Parse.Simple.Base.prototype.constructor = Parse.Simple.Base;
+
+Parse.Simple.Base.Rule = function(params) {
+    if (!arguments.length) { return; }
+
+    for (var p in params) { this[p] = params[p]; }
+    if (!this.children) { this.children = []; }
+};
+
+Parse.Simple.Base.prototype.ruleConstructor = Parse.Simple.Base.Rule;
+
+Parse.Simple.Base.Rule.prototype = {
+    regex: null,
+    capture: null,
+    replaceRegex: null,
+    replaceString: null,
+    tag: null,
+    attrs: null,
+    children: null,
+
+    match: function(data, options) {
+        return data.match(this.regex);
+    },
+
+    build: function(node, r, options) {
+        var data;
+        if (this.capture !== null) {
+            data = r[this.capture];
+        }
+
+        var target;
+        if (this.tag) {
+            target = document.createElement(this.tag);
+            node.appendChild(target);
+        }
+        else { target = node; }
+
+        if (data) {
+            if (this.replaceRegex) {
+                data = data.replace(this.replaceRegex, this.replaceString);
+            }
+            this.apply(target, data, options);
+        }
+
+        if (this.attrs) {
+            for (var i in this.attrs) {
+                target.setAttribute(i, this.attrs[i]);
+                if (i == 'class') { target.className = this.attrs[i]; } // for IE
+            }
+        }
+        return this;
+    },
+
+    apply: function(node, data, options) {
+        var tail = '' + data;
+        var matches = [];
+
+        if (!this.fallback.apply) {
+            this.fallback = new this.constructor(this.fallback);
+        }
+
+        while (true) {
+            var best = false;
+            var rule  = false;
+            for (var i = 0; i < this.children.length; i++) {
+                if (typeof matches[i] == 'undefined') {
+                    if (!this.children[i].match) {
+                        this.children[i] = new this.constructor(this.children[i]);
+                    }
+                    matches[i] = this.children[i].match(tail, options);
+                }
+                if (matches[i] && (!best || best.index > matches[i].index)) {
+                    best = matches[i];
+                    rule = this.children[i];
+                    if (best.index == 0) { break; }
+                }
+            }
+                
+            var pos = best ? best.index : tail.length;
+            if (pos > 0) {
+                this.fallback.apply(node, tail.substring(0, pos), options);
+            }
+            
+            if (!best) { break; }
+
+            if (!rule.build) { rule = new this.constructor(rule); }
+            rule.build(node, best, options);
+
+            var chopped = best.index + best[0].length;
+            tail = tail.substring(chopped);
+            for (var i = 0; i < this.children.length; i++) {
+                if (matches[i]) {
+                    if (matches[i].index >= chopped) {
+                        matches[i].index -= chopped;
+                    }
+                    else {
+                        matches[i] = void 0;
+                    }
+                }
+            }
+        }
+
+        return this;
+    },
+
+    fallback: {
+        apply: function(node, data, options) {
+            node.appendChild(document.createTextNode(data));
+        }
+    }    
+};
+
+Parse.Simple.Base.Rule.prototype.constructor = Parse.Simple.Base.Rule;
+
 Parse.Simple.Creole = function(options) {
     var rx = {};
     rx.link = '[^\\]|~\\n]*(?:(?:\\](?!\\])|~.)[^\\]|~\\n]*)*';
@@ -199,86 +355,3 @@ Parse.Simple.Creole = function(options) {
 Parse.Simple.Creole.prototype = new Parse.Simple.Base();
 
 Parse.Simple.Creole.prototype.constructor = Parse.Simple.Creole;
-//!end
-
-/*
-
-=head1 NAME
-
-Parse.Simple.Base - Parse Creole into DOM
-
-=head1 SYNOPSIS
-
-  var creole = new Parse.Simple.Creole({
-      interwiki: {
-          MeatballWiki: 'http://www.usemod.com/cgi-bin/mb.pl?',
-          TiddlyWiki: 'http://www.tiddlywiki.com/#',
-          WikiCreole: 'http://www.wikicreole.org/wiki/',
-          Palindrome: function(link) {
-                  return 'http://www.example.com/wiki/' + link.split('').reverse().join('');
-              }
-      },
-      linkFormat: '#'
-  });
-  
-  var div = document.createElement('div');
-  creole.parse(div, "* This is [[Wikipedia:Wikitext|wikitext]]");
-
-=head1 DESCRIPTION
-
-This module implements Creole 1.0 parser, as defined by
-L<http://www.wikicreole.org/wiki/Creole1.0>.
-
-=head2 Options
-
-=over
-
-=item interwiki
-
-Interwiki map. Object properties' values are strings, arrays of one or two
-strings, or functions. The first string is a leading part
-of the URL. If the second string is given as well, it is a
-trailing part. If the value is a function, which takes a link identifier as an
-argument, its return value is the whole URL.
-
-=item linkFormat
-
-Internal links' format. Same format as in L<"interwiki">'s properties.
-
-=back
-
-=head1 SEE ALSO
-
-Parse.Simple.Base
-
-=head1 AUTHOR
-
-Ivan Fomichev <F<ifomichev@gmail.com>>
-
-=head1 COPYRIGHT
-
-  Copyright (c) 2008 Ivan Fomichev
-  
-  Portions Copyright (c) 2007 Chris Purcell
-  
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-  
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-  
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
-
-=cut
-
-*/
