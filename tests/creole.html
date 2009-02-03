@@ -529,6 +529,11 @@ var tests = [
     name:   "Image in link",
     input:  "[[Link|Before {{image.png|Alternate}} After]]",
     output: "<p><a href=\"/wiki/Link\">Before <img alt=\"Alternate\" src=\"image.png\"/> After</a></p>"
+  },
+  {
+    name:   "Preformatted block + CR",
+    input:  "{{{\r\nsome text\r\n}}}",
+    output: "<pre>some text\n</pre>"
   }
 ];
 
