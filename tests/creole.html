@@ -1,12 +1,15 @@
-<html>
-<head>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head xmlns="http://www.w3.org/1999/xhtml">
+<title>tests/creole.html</title>
+<meta name="Subversion-Id" content="$Id$"/>
 <script type="text/javascript" src="../lib/Parse/Simple/Base.js"></script>
 <script type="text/javascript" src="../lib/Parse/Simple/Creole.js"></script>
 <script type="text/javascript" src="lib/JSAN.js"></script>
 </head>
 <body>
 <pre id="test">
-<script type="text/javascript">
+<script type="text/javascript"><!--<![CDATA[
 var jsan = new JSAN('lib');
 jsan.use('Test.More');
 
@@ -572,7 +575,7 @@ for (var i in tests) {
 
     is(expected.innerHTML, div.innerHTML, tests[i].name);
 }
-</script>
+//]]>--></script>
 </pre>
 </body>
 </html>
