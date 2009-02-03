@@ -534,6 +534,11 @@ var tests = [
     name:   "Preformatted block + CR",
     input:  "{{{\r\nsome text\r\n}}}",
     output: "<pre>some text\n</pre>"
+  },
+  {
+    name:   "Formatting interwiki links with function",
+    input:  "[[Palindrome:Creole]]",
+    output: "<p><a href=\"http://www.example.com/wiki/eloerC\">Palindrome:Creole</a></p>"
   }
 ];
 
@@ -542,7 +547,10 @@ plan({ tests: tests.length });
 var creole = new Parse.Simple.Creole( {
     interwiki: {
         MeatBall: 'http://www.usemod.com/cgi-bin/mb.pl?',
-        WikiCreole: 'http://www.wikicreole.org/wiki/'
+        WikiCreole: 'http://www.wikicreole.org/wiki/',
+        Palindrome: function(link) {
+                return 'http://www.example.com/wiki/' + link.split('').reverse().join('');
+            }
     },
     linkFormat: '/wiki/'
 } );
