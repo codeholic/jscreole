@@ -534,15 +534,21 @@ var tests = [
     output: "<p><a href=\"/wiki/Link\">Before <img alt=\"Alternate\" src=\"image.png\"/> After</a></p>"
   },
   {
-    name:   "Preformatted block + CR",
-    input:  "{{{\r\nsome text\r\nsome text\r\n}}}",
-    output: "<pre>some text\r\nsome text\r\n</pre>",
-    options: { forIE: true }
-  },
-  {
     name:   "Formatting interwiki links with function",
     input:  "[[Palindrome:Creole]]",
     output: "<p><a href=\"http://www.example.com/wiki/eloerC\">Palindrome:Creole</a></p>"
+  },
+  {
+    name:   "Preformatted block + CR",
+    input:  "{{{\r\nsome text\r\nsome text\r\n}}}",
+    output: "<pre>some text \r\nsome text \r\n</pre>",
+    forIE:  true
+  },
+  {
+    name:   "Block + CR",
+    input:  "some text\r\nsome text\r\n",
+    output: "<p>some text some text </p>",
+    forIE:  true
   }
 ];
 
@@ -563,17 +569,21 @@ var div = document.createElement('div');
 
 for (var i in tests) {
     var test = tests[i];
+    if (test.forIE && !document.all) {
+        skip('for IE only', 1);
+        continue;
+    }
 
     var expected = document.createElement('div');
     expected.innerHTML = test.output;
     expected = expected.cloneNode(true);
 
     var div = document.createElement('div');
-    creole.parse(div, test.input, test.options);
+    creole.parse(div, test.input, { forIE: document.all });
     div.innerHTML = div.innerHTML;
     div = div.cloneNode(true);
 
-    is(expected.innerHTML, div.innerHTML, test.name);
+    is(div.innerHTML, expected.innerHTML, test.name);
 }
 //]]>--></script>
 </pre>

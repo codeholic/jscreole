@@ -50,9 +50,9 @@ Parse.Simple.Base.prototype = {
         else {
             options = this.options;
         }
-        if (options.forIE) { data = data.replace(/\r/g, ''); }
+        data = data.replace(/\r\n?/g, '\n');
         this.grammar.root.apply(node, data, options);
-        if (options.forIE) { node.innerHTML = node.innerHTML.replace(/\n/g, '\r\n'); }
+        if (options && options.forIE) { node.innerHTML = node.innerHTML.replace(/\r?\n/g, '\r\n'); }
     }
 };
 
@@ -103,7 +103,7 @@ Parse.Simple.Base.Rule.prototype = {
         if (this.attrs) {
             for (var i in this.attrs) {
                 target.setAttribute(i, this.attrs[i]);
-                if (options.forIE && i == 'class') { target.className = this.attrs[i]; }
+                if (options && options.forIE && i == 'class') { target.className = this.attrs[i]; }
             }
         }
         return this;
@@ -163,6 +163,10 @@ Parse.Simple.Base.Rule.prototype = {
 
     fallback: {
         apply: function(node, data, options) {
+            if (options && options.forIE) {
+                // workaround for bad IE
+                data = data.replace(/\n/g, ' \r');
+            }
             node.appendChild(document.createTextNode(data));
         }
     }    
