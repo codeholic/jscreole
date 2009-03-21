@@ -183,6 +183,11 @@ Parse.Simple.Creole = function(options) {
     rx.rawUri = rx.uriPrefix + '\\S*[^\\s!"\',.:;?]';
     rx.interwikiPrefix = '[\\w.]+:';
     rx.interwikiLink = rx.interwikiPrefix + rx.link;
+    rx.img = '\\{\\{((?!\\{)[^|}\\n]*(?:}(?!})[^|}\\n]*)*)' +
+             (options && options.strict ? '' : '(?:') + 
+             '\\|([^}~\\n]*((}(?!})|~.)[^}~\\n]*)*)' +
+             (options && options.strict ? '' : ')?') +
+             '}}';
 
     var formatLink = function(link, format) {
         if (format instanceof Function) {
@@ -220,7 +225,10 @@ Parse.Simple.Creole = function(options) {
         tr: { tag: 'tr', capture: 2, regex: /(^|\n)(\|.*?)\|?[ \t]*(\n|$)/ },
         th: { tag: 'th', regex: /\|+=([^|]*)/, capture: 1 },
         td: { tag: 'td', capture: 1,
-            regex: /\|+([^|~]*(~(.|(?=\n)|$)[^|~]*)*)/ },
+            regex: '\\|+([^|~\\[{]*((~(.|(?=\\n)|$)|' +
+                   '\\[\\[' + rx.link + '(\\|' + rx.linkText + ')?\\]\\]' +
+                   (options && options.strict ? '' : '|' + rx.img) +
+                   '|[\\[{])[^|~]*)*)' },
 
         singleLine: { regex: /.+/, capture: 0 },
         paragraph: { tag: 'p', capture: 0,
@@ -234,12 +242,13 @@ Parse.Simple.Creole = function(options) {
                    '((' + rx.rawUri + '|\\/(?!\\/)|~(.|(?=\\n)|$))' +
                    '((?!' + rx.uriPrefix + ')[^\\/~])*)*)(\\/\\/|\\n|$)' },
 
-        img: { regex: '\\{\\{((?!\\{)[^|}\\n]*(?:}(?!})[^|}\\n]*)*)\\|' +
-                      '([^}~\\n]*((}(?!})|~.)[^}~\\n]*)*)}}',
+        img: { regex: rx.img,
             build: function(node, r, options) {
                 var img = document.createElement('img');
                 img.src = r[1];
-                img.alt = r[2].replace(/~(.)/g, '$1');
+                img.alt = r[2] === undefined
+                    ? (options && options.defaultImageText ? options.defaultImageText : '')
+                    : r[2].replace(/~(.)/g, '$1');
                 node.appendChild(img);
             } },
 

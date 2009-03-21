@@ -549,23 +549,54 @@ var tests = [
     input:  "some text\r\nsome text\r\n",
     output: "<p>some text some text </p>",
     forIE:  true
+  },
+  {
+    name:   "Named link in table",
+    input:  "| [[MyLink|My link]] |",
+    output: '<table><tr><td> <a href="/wiki/MyLink">My link</a> </td></tr></table>'
+  },
+  {
+    name:   "Image in table",
+    input:  "| {{image.png|Alternative text}} |",
+    output: '<table><tr><td> <img alt="Alternative text" src="image.png"/> </td></tr></table>'
+  },
+  {
+    name:   "Image in table (strict)",
+    input:  "| {{image.png|Alternative text}} |",
+    output: '<table><tr><td> {{image.png</td><td>Alternative text}} </td></tr></table>',
+    options: { strict: true }
+  },
+  {
+    name:   "Image in named link in table",
+    input:  "| [[Link|{{image.png|Alternative text}}]] |",
+    output: '<table><tr><td> <a href="/wiki/Link"><img alt="Alternative text" src="image.png"/></a> </td></tr></table>'
+  },
+  {
+    name:   "Image without alternative text",
+    input:  "{{image.png}}",
+    output: '<p><img alt="" src="image.png"/></p>'
+  },
+  {
+    name:   "Image without alternative text (strict)",
+    input:  "{{image.png}}",
+    output: '<p>{{image.png}}</p>',
+    options: { strict: true }
+  },
+  {
+    name:   "Image with empty alternative text",
+    input:  "{{image.png|}}",
+    output: '<p><img alt="" src="image.png"/></p>',
+    options: { strict: true }
+  },
+  {
+    name:   "Image with custom default alternative text",
+    input:  "{{image.png}}",
+    output: '<p><img alt="Image" src="image.png"/></p>',
+    options: { defaultImageText: 'Image' }
   }
 ];
 
 plan({ tests: tests.length });
-
-var creole = new Parse.Simple.Creole( {
-    interwiki: {
-        MeatBall: 'http://www.usemod.com/cgi-bin/mb.pl?',
-        WikiCreole: 'http://www.wikicreole.org/wiki/',
-        Palindrome: function(link) {
-                return 'http://www.example.com/wiki/' + link.split('').reverse().join('');
-            }
-    },
-    linkFormat: '/wiki/'
-} );
-
-var div = document.createElement('div');
 
 for (var i in tests) {
     var test = tests[i];
@@ -578,8 +609,22 @@ for (var i in tests) {
     expected.innerHTML = test.output;
     expected = expected.cloneNode(true);
 
+    var options = test.options ? test.options : {};
+    options.forIE = document.all;
+    options.interwiki = {
+            MeatBall: 'http://www.usemod.com/cgi-bin/mb.pl?',
+            WikiCreole: 'http://www.wikicreole.org/wiki/',
+            Palindrome: function(link) {
+                    return 'http://www.example.com/wiki/' + link.split('').reverse().join('');
+                }
+        };
+    options.linkFormat = '/wiki/';
+    
     var div = document.createElement('div');
-    creole.parse(div, test.input, { forIE: document.all });
+    var creole = new Parse.Simple.Creole(options);
+
+    creole.parse(div, test.input, options);
+    
     div.innerHTML = div.innerHTML;
     div = div.cloneNode(true);
 
