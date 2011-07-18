@@ -144,6 +144,36 @@ var tests = [
     input:  "====== Header =",
     output: "<h6>Header</h6>"
   },
+  { // Test h1 (no spaces)
+    name:   "h1 (no spaces)",
+    input:  "=Header=",
+    output: "<h1>Header</h1>"
+  },
+  { // Test h2 (no spaces)
+    name:   "h2 (no spaces)",
+    input:  "==Header=",
+    output: "<h2>Header</h2>"
+  },
+  { // Test h3 (no spaces)
+    name:   "h3 (no spaces)",
+    input:  "===Header=",
+    output: "<h3>Header</h3>"
+  },
+  { // Test h4 (no spaces)
+    name:   "h4 (no spaces)",
+    input:  "====Header=",
+    output: "<h4>Header</h4>"
+  },
+  { // Test h5 (no spaces)
+    name:   "h5 (no spaces)",
+    input:  "=====Header",
+    output: "<h5>Header</h5>"
+  },
+  { // Test h6 (no spaces)
+    name:   "h6 (no spaces)",
+    input:  "======Header=",
+    output: "<h6>Header</h6>"
+  },
   { // Test above h6 (should be ignored)
     name:   ">h6",
     input:  "======= Header =",
