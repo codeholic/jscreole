@@ -174,6 +174,11 @@ var tests = [
     input:  "======Header=",
     output: "<h6>Header</h6>"
   },
+  { // Test header-like pattern
+    name:   "header-like",
+    input:  "====\n",
+    output: "<p>====\n</p>"
+  },
   { // Test above h6 (should be ignored)
     name:   ">h6",
     input:  "======= Header =",
