@@ -2,8 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head xmlns="http://www.w3.org/1999/xhtml">
 <title>tests/base.html</title>
-<meta name="Subversion-Id" content="$Id$"/>
-<script type="text/javascript" src="../lib/Parse/Simple/Base.js"></script>
+<script type="text/javascript" src="../lib/creole.js"></script>
 <script type="text/javascript" src="lib/JSAN.js"></script>
 </head>
 <body>
@@ -16,14 +15,14 @@ plan({ tests: 1 });
 
 // Define grammar
 var grammar = {
-    p: { regex: new RegExp('[ \\t]*\\S.*((\\r?\\n|\\n)[ \\t]*\\S.*)'),
-        capture: 0, tag: 'p' }
+    p: { _regex: new RegExp('[ \\t]*\\S.*((\\r?\\n|\\n)[ \\t]*\\S.*)'),
+        _capture: 0, _tag: 'p' }
 };
-grammar.root = { children: [ grammar.p ] };
+grammar._root = { _children: [ grammar.p ] };
 
 // Prepare objects
 var div = document.createElement('div');
-var p = new Parse.Simple.Base(grammar);
+var p = new creole._base(grammar);
 
 // Begin tests
 p.parse(div, 'para\n continues\n\nanother para\n \nyet another para');
