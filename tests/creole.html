@@ -87,6 +87,11 @@ var tests = [
     input:  "# Item\n# **Bold item**",
     output: "<ol><li> Item</li>\n<li> <strong>Bold item</strong></li></ol>"
   },
+  {
+    name:   "Ordered list inside unordered list",
+    input:  "* Item\n## Subitem",
+    output: "<ul><li> Item<ol>\n<li> Subitem</li></ol></ul>"
+  },
   { // Test hr
     name:   "Horizontal rule",
     input:  "Some text\n----\nSome more text",
