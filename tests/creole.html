@@ -631,6 +631,20 @@ var tests = [
     input:  "{{image.png}}",
     output: '<p><img alt="Image" src="image.png"/></p>',
     options: { defaultImageText: 'Image' }
+  },
+
+  // test inline-only mode
+  {
+    name:   "Inline markup",
+    input:  "This is //some// **markup**",
+    output: 'This is <em>some</em> <strong>markup</strong>',
+    options: { inline: true }
+  },
+  {
+    name:   "Inline markup with newlines",
+    input:  "This is //some//\n\n**markup**",
+    output: 'This is <em>some</em> <strong>markup</strong>',
+    options: { inline: true }
   }
 ];
 
