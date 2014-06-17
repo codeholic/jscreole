@@ -1,0 +1,27 @@
+{
+  "name": "jscreole",
+  "version": "1.0.0",
+  "homepage": "https://github.com/codeholic/jscreole",
+  "authors": [
+    "Ivan Fomichev"
+  ],
+  "description": "A JavaScript library for parsing Creole 1.0 wiki markup.",
+  "main": "lib/creole.js",
+  "moduleType": [
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "creole",
+    "markup",
+    "parser"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
