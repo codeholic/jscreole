@@ -7,7 +7,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha  --compilers coffee:coffee-script/register --recursive tests/node",
+    "test-watch": "npm run test -- -w"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,8 @@
   },
   "homepage": "https://github.com/codeholic/jscreole",
   "devDependencies": {
+    "coffee-script": "^1.9.0",
+    "fluentnode": "^0.3.4",
     "jsdom": "^3.1.0",
     "mocha": "^2.1.0"
   }
