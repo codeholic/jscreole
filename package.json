@@ -1,0 +1,29 @@
+{
+  "name": "jscreole",
+  "version": "0.9.0",
+  "description": "A JavaScript library for parsing Creole 1.0 wiki markup.",
+  "main": "lib/creole.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codeholic/jscreole"
+  },
+  "keywords": [
+    "wikitext",
+    "jscreole"
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/codeholic/jscreole/issues"
+  },
+  "homepage": "https://github.com/codeholic/jscreole",
+  "devDependencies": {
+    "jsdom": "^3.1.0",
+    "mocha": "^2.1.0"
+  }
+}
